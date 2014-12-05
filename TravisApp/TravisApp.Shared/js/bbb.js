@@ -1,7 +1,9 @@
-﻿function createConstraints(ui, worker) {
+﻿window.createConstraints = function(ui, workers) {
     var d = new DBPlanner();
-    always: {
-        solver: d
-        ui.model === worker.model
-    }
+    workers.forEach(function (ea) {
+        always: {
+                solver: d
+            ui.model === ea.model
+        }
+    });
 };

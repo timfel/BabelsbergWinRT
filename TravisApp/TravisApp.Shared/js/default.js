@@ -5,10 +5,18 @@
     var app = WinJS.Application;
     var activation = Windows.ApplicationModel.Activation;
 
-    var model1 = new ProgressThing(),
-        model2 = new ProgressThing(),
-        ui = new UI(model1, model2),
-        worker = new Worker([model1, model2]);
+    var models = [
+            new ProgressThing("model1"),
+            new ProgressThing("model2"),
+            new ProgressThing("model3")
+        ],
+        workers = [
+            new Worker(models, 0),
+            new Worker(models, 1),
+            new Worker(models, 2),
+            new Worker(models, 3)
+        ],
+        ui = new UI(models, workers);
 
     app.onactivated = function (args) {
         if (args.detail.kind === activation.ActivationKind.launch) {
@@ -16,7 +24,7 @@
                 // TODO: This application has been newly launched. Initialize
                 // your application here.
                 document.addEventListener('babelsbergready', function () {
-                    window.addConstraints(ui, worker);
+                    window.createConstraints(ui, workers);
                 })
             } else {
                 // TODO: This application has been reactivated from suspension.

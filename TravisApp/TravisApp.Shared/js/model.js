@@ -1,46 +1,66 @@
-﻿function ProgressThing() {
-    this.progress1 = 0;
-    this.progress2 = 0;
+﻿function ProgressThing(name) {
+    this.name = name;
+    this.progress = [];
 }
 
-function UI(model1, model2) {
+function UI(models, workers) {
+    this.progressbars = [];
+    this.buttons = [];
     window.addEventListener('load', function () {
-        this.button1 = document.getElementById("button1");
-        this.button2 = document.getElementById("button2");
-        this.progress1 = document.getElementById("progress1");
-        this.progress2 = document.getElementById("progress2");
+        var btnDiv = document.getElementById("btnDiv"),
+            pDiv = document.getElementById("pDiv");
 
-        this.button1.onclick = function () {
-            this.model = model1
-        }.bind(this);
-        this.button2.onclick = function () {
-            this.model = model2
-        }.bind(this);
+        models.forEach(function (model) {
+            var btn = document.createElement("button");
+            btn.textContent = model.name;
+            btn.onclick = function () {
+                this.model = model;
+            }.bind(this);
+            btnDiv.appendChild(btn);
+            this.buttons.push(btn);
+        }.bind(this));
+
+        workers.forEach(function (worker) {
+            var progress = document.createElement("p");
+            progress.textContent = "0%";
+            pDiv.appendChild(progress);
+            this.progressbars.push(progress);
+        }.bind(this));
     }.bind(this));
-    this.model = model1;
+    this.model = models[0];
     setInterval(this.update.bind(this), 500);
 }
 
 UI.prototype.update = function () {
-    // TODO: should be a constraint
+    // TODO: should be in constraints
     if (!this.model) return;
-    this.progress1.textContent = Math.round(this.model.progress1) + "";
-    this.progress2.textContent = Math.round(this.model.progress2) + "";
+    for (var i = 0; i < this.model.progress.length; i++) {
+        this.progressbars[i].textContent = Math.round(this.model.progress[i]) + "%";
+    };
+    this.buttons.forEach(function (btn) {
+        if (btn.textContent === this.model.name) {
+            btn.style.backgroundColor = "#ccc";
+        } else {
+            btn.style.backgroundColor = "";
+        }
+    }.bind(this));
 }
 
-function Worker(models) {
+function Worker(models, idx) {
     this.models = models;
     this.model = models[0];
+    this.idx = idx;
     setInterval(this.update.bind(this), 1000);
 }
 
 Worker.prototype.update = function () {
-    this.model.progress1 += Math.min(this.model.progress2 + Math.random(), 100);
-    this.model.progress2 = Math.min(this.model.progress2 + Math.random(), 100);
-    if (this.model.progress1 === 100 && this.model.progress2 === 100) {
+    this.model.progress[this.idx] = Math.min(
+        (this.model.progress[this.idx] || 0) + Math.random() * (Math.random() * 10),
+        100
+    );
+    if (this.model.progress[this.idx] === 100) {
         var prev = this.model;
         this.model = this.models[(this.models.indexOf(this.model) + 1) % this.models.length];
-        prev.progress1 = 0;
-        prev.progress2 = 0;
+        prev.progress[this.idx] = 0;
     }
 }
